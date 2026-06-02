@@ -1,22 +1,24 @@
 import subprocess
 from pathlib import Path
 import sys
+import argparse
+from formats import all_formats, default_formats
 
-filetypes = [
-    ".binka",
-    ".wem",
-    ".awb",
-    ".fsb"]
+parser = argparse.ArgumentParser()
+parser.add_argument("files", nargs="*", help="Files to process")
+parser.add_argument("-f", "--formats", nargs="+", default=default_formats, choices=all_formats,
+                    help="List of formats to check for. Separated by spaces.")
 
-def get_binka_files_from_path(path):
+
+def get_files_from_path(path, formats):
     path = Path(path)
 
-    if path.is_file() and path.suffix.lower() in filetypes:
+    if path.is_file() and path.suffix.removeprefix(".").lower() in formats:
         return [path]
 
     if path.is_dir():
         lst = []
-        for t in filetypes:
+        for t in formats:
             c = list(path.rglob(f"*{t}"))
             print(f"Found {len(c)} {t} files in {path}")
             lst.extend(c)
@@ -25,10 +27,10 @@ def get_binka_files_from_path(path):
 
     return []
 
-def collect_all_binka_files(paths):
+def collect_all_files(paths, formats):
     files = []
     for path in paths:
-        files.extend(get_binka_files_from_path(path))
+        files.extend(get_files_from_path(path, formats))
     return files
 
 def executeFiles(exe_path, binka_files):
@@ -47,22 +49,22 @@ def executeFiles(exe_path, binka_files):
             print(f"Error processing {file}: {e}")
 
 if __name__ == "__main__":
-    if len(sys.argv) < 2:
+    args = parser.parse_args()
+
+    if not args.files:
         print("Drag and drop files or folders onto this executable.")
         input("Press Enter to exit...")
         sys.exit()
-
-    input_paths = sys.argv[1:]
 
     exe_path = (
         Path(getattr(sys, "_MEIPASS", "."))
         / "vgmstream"
         / "vgmstream-cli.exe")
 
-    binka_files = collect_all_binka_files(input_paths)
+    files = collect_all_files(args.files, args.formats)
 
-    if binka_files:
-        executeFiles(exe_path, binka_files)
+    if files:
+        executeFiles(exe_path, files)
 
     else:
         print("No supported files found.")
