@@ -8,7 +8,7 @@ By default, dragging and dropping files/folders onto the executable will search 
 - bank
   
 ## Arguments:  
-To convert other formats, call it from cli with `-f {formats}` where {formats} are a list of file extensions, separated by spaces.   
+To convert other formats, call it from cli with `-f {formats}` where {formats} are a list of file extensions, separated by spaces. 
 For example, to convert all .hca and .fwav files:  
 `.\vgm2wav input_files -f hca fwav`  
   
